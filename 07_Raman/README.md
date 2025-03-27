@@ -109,24 +109,24 @@ We will start with backscattering in $z$ direction:
 
   this should give the file `outfile.phonon_self_energy.hdf5` that you already encountered.
 
-- Now we create the mode displacements via
+- Now we create the atomic displacements via
   ```bash
-  tdep_displace_modes
+  tdep_displace_atoms
   ```
 
   which will create positive and negative displacements for each mode, minus the acoustic ones, and write them to `outfile.ucposcar.mode.003.plus`, `outfile.ucposcar.mode.003.minus`, etc.
 
-- **Now comes the DFPT part:** Convert these geometry files to the input of the DFT code of you choice which is capable of computing the dielectric tensor (Born charges are not needed, good luck FHI-aims users), and compute the dielectric tensor for each sample. I recommend to use a dedicated folder for this like before, let's say `samples`.
+- **Now comes the DFPT part:** Convert these geometry files to the input of the DFT code of you choice which is capable of computing the dielectric tensor (Born charges are not needed, good luck FHI-aims users), and compute the dielectric tensor for each sample. I recommend to use a dedicated folder for this like before, let's say `displacements`.
 
 - When you are finished with all dielectric constants, parse them with e.g.
   ```bash
   cd samples
-  tdep_parse_output sample.000*/qe.json
+  tdep_parse_output displacement.000*/qe_dfpt_output.json
   ```
 
-  in case [you are using Quantum Espresso](../00_preparation/parsing/QuantumEspresso/README.md), other codes that should work out of the box are VASP and FHI-aims. If you are using another code, just make sure to write the dielectric tensors into a plain text file with 3 columns, similar to the `infile.lotosplitting`. Name the file `infile.dielectric_tensor` and copy or link it to your working directory `raman_z`.
-
-  **If you cannot run DFPT at the moment, do not worry, and take the hidden input files in `07_Raman/example_GaN/.assets`.**
+  in case [you are using Quantum Espresso](../00_preparation/parsing/QuantumEspresso/README.md), other codes that should work out of the box are VASP and FHI-aims. If you are using another code, just make sure to write the dielectric tensors into a plain text file with 3 columns, similar to the `infile.lotosplitting`. The order to follow when writing the tensors in this file is the same used in the numbering of the outfiles obtained from `tdep_displace_atoms` (that is the order of the atoms in the `infile.ucposcar` and first + and then - displacement). Name the file `infile.dielectric_tensor` and copy or link it to your working directory `raman_z`.
+  Note that the units of the dielectric tensor are not important (of course they must be consistent among the displacements), as they renormalize the whole spectrum intensity.
+  **We will skip this step now, due to time reasons, but naturally this is something you need to do for production runs. For the time being, we will use the hidden input file `07_Raman/example_GaN/.assets/infile.dielectric_tensor`.**
 
 - Good, now we can compute the Raman tensors, and convolute them with the spectral functions, i.e., evaluate Eq. (1). There is a script to do this in several ways:
 
@@ -136,11 +136,16 @@ We will start with backscattering in $z$ direction:
 
   done.
 
+Isotropic average and polarized 
+
+## Polarization
+Two kind of polarizations are 
+
 ## Analysis
 
 Now we have several files:
 
-- `outfile.mode_intensity.csv`: Gives the (isotropically averaged) intensity for each mode. Plot the intensities vs. harmonic frequencies, e.g.
+- `outfile.raman_activity_mode_001.csv`: for each mode has an index, frequency, frequency in cm$^{-1}$, isotropically averaged intensity, and the unpolarized intensity. The isotropic average is done according to ### REF ###, while the unpolarized intensity is just 
 
   ```python
   import pandas as pd
